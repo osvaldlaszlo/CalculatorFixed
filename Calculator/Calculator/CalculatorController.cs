@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 
-namespace Calculator //need to re-evaluate current/storedOperation, and how to handle operators after equals testestset
+namespace Calculator //need to re-evaluate current/storedOperation, and how to handle operators after equals
 {
     public enum Operator
     {
