@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Calculator.CalculatorView">
+  <StackLayout>
+    <Label Text="{Binding Display}" BackgroundColor="Purple"/>
+    <Grid>
+      <Button Grid.Row="4" Grid.Column="1" Text="0" Command="{Binding NumberPressedCommand}" CommandParameter="0" />
+      <Button Grid.Row="3" Grid.Column="0" Text="1" Command="{Binding NumberPressedCommand}" CommandParameter="1" />
+      <Button Grid.Row="3" Grid.Column="1" Text="2" Command="{Binding NumberPressedCommand}" CommandParameter="2" />
+      <Button Grid.Row="3" Grid.Column="2" Text="3" Command="{Binding NumberPressedCommand}" CommandParameter="3" />
+      <Button Grid.Row="2" Grid.Column="0" Text="4" Command="{Binding NumberPressedCommand}" CommandParameter="4" />
+      <Button Grid.Row="2" Grid.Column="1" Text="5" Command="{Binding NumberPressedCommand}" CommandParameter="5" />
+      <Button Grid.Row="2" Grid.Column="2" Text="6" Command="{Binding NumberPressedCommand}" CommandParameter="6" />
+      <Button Grid.Row="1" Grid.Column="0" Text="7" Command="{Binding NumberPressedCommand}" CommandParameter="7" />
+      <Button Grid.Row="1" Grid.Column="1" Text="8" Command="{Binding NumberPressedCommand}" CommandParameter="8" />
+      <Button Grid.Row="1" Grid.Column="2" Text="9" Command="{Binding NumberPressedCommand}" CommandParameter="9" />
+
+      <Button Grid.Row="0" Grid.Column="3" Text="/" Command="{Binding OperatorPressedCommand}" CommandParameter="Divide" />
+      <Button Grid.Row="1" Grid.Column="3" Text="*" Command="{Binding OperatorPressedCommand}" CommandParameter="Multiply" />
+      <Button Grid.Row="2" Grid.Column="3" Text="-" Command="{Binding OperatorPressedCommand}" CommandParameter="Subtract" />
+      <Button Grid.Row="3" Grid.Column="3" Text="+" Command="{Binding OperatorPressedCommand}" CommandParameter="Add" />
+      
+      <Button Grid.Row="0" Grid.Column="0" Text="C" Command="{Binding ModifierPressedCommand}" CommandParameter="Clear" />
+      <Button Grid.Row="4" Grid.Column="2" Text="." Command="{Binding ModifierPressedCommand}" CommandParameter="Period" />
+      <Button Grid.Row="4" Grid.Column="3" Text="=" Command="{Binding ModifierPressedCommand}" CommandParameter="Equal" />
+      <Button Grid.Row="4" Grid.Column="0" Text="±" Command="{Binding ModifierPressedCommand}" CommandParameter="Invert" />
+      <Button Grid.Row="0" Grid.Column="1" Text="(" Command="{Binding ModifierPressedCommand}" CommandParameter="OpenParen" />
+      <Button Grid.Row="0" Grid.Column="2" Text=")" Command="{Binding ModifierPressedCommand}" CommandParameter="ClosedParen" />
+    </Grid>
+  </StackLayout>
+</ContentPage>
