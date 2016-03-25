@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Calculator.CalculatorView">
   <StackLayout>
-    <Label Text="{Binding Display}" BackgroundColor="Purple"/>
+    <Label Text="{Binding Display}" HorizontalTextAlignment="End" FontSize="40"/>
     <Grid>
       <Button Grid.Row="4" Grid.Column="1" Text="0" Command="{Binding NumberPressedCommand}" CommandParameter="0" />
       <Button Grid.Row="3" Grid.Column="0" Text="1" Command="{Binding NumberPressedCommand}" CommandParameter="1" />

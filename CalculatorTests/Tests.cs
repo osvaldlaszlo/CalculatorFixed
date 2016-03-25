@@ -23,7 +23,7 @@ namespace CalculatorTests
 
         public void SendOperatorPressed(Operator op)
         {
-            OperatorPressed?.Invoke(this, new OperatorPressedEventArgs(op));
+           OperatorPressed?.Invoke(this, new OperatorPressedEventArgs(op));
         }
         
         public void SendModifierPressed(Modifier mod)
@@ -129,8 +129,15 @@ namespace CalculatorTests
 
             mockView.SendNumberPressed(2);
             mockView.SendModifierPressed(Modifier.Invert);
-
             Assert.AreEqual("-2", mockView.Display);
+
+            mockView.SendOperatorPressed(Operator.Add);
+            mockView.SendNumberPressed(3);
+            mockView.SendModifierPressed(Modifier.Equal);
+            Assert.AreEqual("1", mockView.Display);
+
+            mockView.SendModifierPressed(Modifier.Invert);
+            Assert.AreEqual("-1", mockView.Display);            
         }
 
         [Test]
@@ -238,7 +245,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void TestEntryAfterEquals()
+        public void TestEntryAfterEqual()
         {
             var mockView = new MockView();
             var controller = new CalculatorController(mockView);
@@ -257,6 +264,27 @@ namespace CalculatorTests
             mockView.SendModifierPressed(Modifier.Equal);
 
             Assert.AreEqual("-2", mockView.Display);
+        }
+
+        [Test]
+        public void TestDoubleEqual()
+        {
+            var mockView = new MockView();
+            var controller = new CalculatorController(mockView);
+
+            mockView.SendNumberPressed(2);
+            mockView.SendOperatorPressed(Operator.Multiply);
+            mockView.SendNumberPressed(2);
+            mockView.SendModifierPressed(Modifier.Equal);
+            mockView.SendModifierPressed(Modifier.Equal);
+
+            Assert.AreEqual("8", mockView.Display);
+
+            mockView.SendModifierPressed(Modifier.Equal);
+            Assert.AreEqual("16", mockView.Display);
+
+            mockView.SendModifierPressed(Modifier.Equal);
+            Assert.AreEqual("32", mockView.Display);
         }
     }
 }

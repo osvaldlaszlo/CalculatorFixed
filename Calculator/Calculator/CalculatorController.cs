@@ -65,9 +65,9 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
     public class OperatorPressedEventArgs : EventArgs
     {
         public OperatorPressedEventArgs(Operator op)
-        {
+       {
             this.Operator = op;
-        }
+       }
 
         public Operator Operator { get; set; }
     }
@@ -91,6 +91,7 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
         int decimalCount = 1;
         bool parenFlag = false;
         bool equalFlag = false;
+        bool HasSomethingBeenPressed = false;
 
         Operation current = 0; //initialize current operation
         Operation storedOperation = 0; //initialize storedOperation
@@ -107,41 +108,82 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
 
         private void HandleOperatorPressed(object sender, OperatorPressedEventArgs e)
         {
+            HasSomethingBeenPressed = true;
             entry = Entry.Integer;
             decimalCount = 1;
 
             switch (e.Operator)
             {
-                case Operator.Add:
-                    if (parenFlag || equalFlag)
+                case Operator.Add: //convert to switches....
+                    if (parenFlag) //if inside parentheses, do paren math
                     {
-                        NewOperation(new AddOperation(), current);
-                    } else
-                        NewOperation(new AddOperation(), storedOperation);
+                        UpdateCurrentOperands(new AddOperation(), current, null);
+                    } else if (equalFlag) //do math correctly in weird situations ( ...x = + 3 should give x+3)
+                    {
+                        UpdateCurrentOperands(new AddOperation(), current.Result, null);
+                        equalFlag = false;
+                    } else if (current.LeftOperand != null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(current, current.LeftOperand, storedOperation);
+                        UpdateCurrentOperands(new AddOperation(), current.Result, null);
+                    } else if (current.LeftOperand == null && current.RightOperand == null) //first entry (or entry after clear)
+                    {
+                        UpdateCurrentOperands(new AddOperation(), storedOperation, null);
+                    }
                     break;
 
                 case Operator.Subtract:
-                    if (parenFlag || equalFlag)
+                    if (parenFlag)
                     {
-                        NewOperation(new SubtractOperation(), current);
-                    } else
-                        NewOperation(new SubtractOperation(), storedOperation);
+                        UpdateCurrentOperands(new SubtractOperation(), current, null);
+                    } else if (equalFlag)
+                    {
+                        UpdateCurrentOperands(new SubtractOperation(), current.Result, null);
+                        equalFlag = false;
+                    } else if (current.LeftOperand != null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(current, current.LeftOperand, storedOperation);
+                        UpdateCurrentOperands(new SubtractOperation(), current.Result, null);
+                    } else if (current.LeftOperand == null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(new SubtractOperation(), storedOperation, null);
+                    }
                     break;
 
                 case Operator.Multiply:
-                    if (parenFlag || equalFlag)
+                    if (parenFlag)
                     {
-                        NewOperation(new MultiplyOperation(), current);
-                    } else
-                        NewOperation(new MultiplyOperation(), storedOperation);
+                        UpdateCurrentOperands(new MultiplyOperation(), current, null);
+                    } else if (equalFlag)
+                    {
+                        UpdateCurrentOperands(new MultiplyOperation(), current.Result, null);
+                        equalFlag = false;
+                    } else if (current.LeftOperand != null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(current, current.LeftOperand, storedOperation);
+                        UpdateCurrentOperands(new MultiplyOperation(), current.Result, null);
+                    } else if (current.LeftOperand == null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(new MultiplyOperation(), storedOperation, null);
+                    }
                     break;
 
                 case Operator.Divide:
-                    if (parenFlag || equalFlag)
+                    if (parenFlag)
                     {
-                        NewOperation(new DivideOperation(), current);
-                    } else
-                        NewOperation(new DivideOperation(), storedOperation);
+                        UpdateCurrentOperands(new DivideOperation(), current, null); 
+                    } else if (equalFlag)
+                    {
+                        UpdateCurrentOperands(new DivideOperation(), current.Result, null);
+                        equalFlag = false;
+                    } else if (current.LeftOperand != null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(current, current.LeftOperand, storedOperation);
+                        UpdateCurrentOperands(new DivideOperation(), current.Result, null);
+                    } else if (current.LeftOperand == null && current.RightOperand == null)
+                    {
+                        UpdateCurrentOperands(new DivideOperation(), storedOperation, null);
+                    }
                     break;
             }
         }
@@ -153,11 +195,10 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
                 case Modifier.Clear:
                     this.view.Display = "";
                     mode = Mode.Replace;
-                    current = null;
-                    storedOperation = null;
-                    parenStack = null;
+                    current = 0;
+                    storedOperation = 0;
+                    parenStack = new Stack<Operation>();
                     parenFlag = false;
-                    equalFlag = false;
                     break;
 
                 case Modifier.Equal: 
@@ -169,26 +210,46 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
                         break;
                     }
 
+                    if(equalFlag)
+                    {
+                        UpdateCurrentOperands(current, current.Result, storedOperation);
+                    }
+
                     current.RightOperand = storedOperation;
                     this.view.Display = current.Result.ToString("0.####");
-                    mode = Mode.Replace;
                     equalFlag = true;
+                    mode = Mode.Replace;
                     break;
 
                 case Modifier.Period:
                     current = storedOperation;
-                    this.view.Display = current.Result.ToString("0.####");
+                    this.view.Display = current.Result.ToString("0.");
                     mode = Mode.Replace;
                     entry = Entry.Decimal;
                     break;
 
                 case Modifier.Invert:
-                    current = current.Result * -1;
-                    this.view.Display = current.Result.ToString("0.####");
+                    if (current.GetType() == typeof(Constant))
+                    {
+                        current = current.Result * -1;
+                        storedOperation = storedOperation.Result*-1;
+                    } else if (current.LeftOperand == null && current.RightOperand == null)
+                    {
+                        storedOperation = storedOperation.Result * -1;
+                    } else if (current.LeftOperand != null && current.RightOperand == null)
+                    {
+                        current.LeftOperand = current.LeftOperand.Result * -1;
+                        storedOperation = current.LeftOperand;
+                    } else if (current.LeftOperand != null && current.RightOperand != null)
+                    {
+                        current = current.Result * -1;
+                    }
+                    this.view.Display = "-" + this.view.Display;
                     break;
 
                 case Modifier.OpenParen:
                     parenStack.Push(current.Clone());
+                    current = 0;
                     mode = Mode.Replace;
                     this.view.Display = "0";
                     break;
@@ -208,6 +269,7 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
 
         private void HandleNumberPressed(object sender, NumberPressedEventArgs e)
         {
+            HasSomethingBeenPressed = true;
 
             if (entry == Entry.Decimal) 
             {
@@ -231,9 +293,10 @@ namespace Calculator //need to re-evaluate current/storedOperation, and how to h
             
         }
 
-        private void NewOperation(Operation operation, Operation newOperand)
+        private void UpdateCurrentOperands(Operation operation, Operation leftOp, Operation rightOp)
         {
-            operation.LeftOperand = newOperand;
+            operation.LeftOperand = leftOp;
+            operation.RightOperand = rightOp;
             current = operation;
             mode = Mode.Replace;
             return;
